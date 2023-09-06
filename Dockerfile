@@ -1,5 +1,10 @@
-FROM openjdk:8-alpine
-LABEL authors="avdhoot"
+FROM maven:3.9 AS builder
+RUN mkdir -p /app/source
+COPY . /app/source
+WORKDIR /app/source
+RUN mvn clean package
+
+FROM openjdk:17-alpine
+COPY --from=builder /app/source/target/*.jar /app/app.jar
 EXPOSE 8080
-ADD target/springboot-0.0.1-SNAPSHOT.jar app.jar
-ENTRYPOINT ["java", "-jar", "/app.jar"]
+ENTRYPOINT ["java", "-jar", "/app/app.jar"]
